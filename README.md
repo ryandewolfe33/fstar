@@ -16,7 +16,7 @@ For examples of using fstar, please see the notebooks in the `experiments` folde
 ## API
 The main function is also named `fstar`, and computes a similarity score between two clusterings.
 ```
-fstar.fstar(c1, c2, outliers=True,drop_outliers=False) -> float:
+fstar.fstar(c1, c2, outliers=True,drop_outliers=False, alpha=0.5) -> float:
     Compute F*_wo between c1 and c2.
 
     Parameters
@@ -24,9 +24,8 @@ fstar.fstar(c1, c2, outliers=True,drop_outliers=False) -> float:
     c1:scipy.sparse.array or np.ndarray - the first clustering
     c2:scipy.sparse_array or np.ndarray - the second clustering
     outliers:bool (defualt=True) - Flag to add outlier comparison term. If True compute F*_wo, if False compute F*_w
-    drop_outliers:[False, 'c1', 'c2', 'either', 'both'] (default=False) - Flag to drop objects that consider outliers
-        before computing score. Can be helpful for determining the quality of the clusters
-        when extra outliers are not a concern.
+    drop_outliers:[False, 'c1', 'c2', 'either', 'both'] (default=False) - Flag to drop objects that consider outliers before computing score. Can be helpful for determining the quality of the clusters when extra outliers are not a concern.
+    alpha:float (default=0.5) - A value between 0 and 1 to control the importance of matching in each direction. The default 0.5 is a symmetric measure, and 0/1 only looks at the best match for clustering in c1/c2.
     
     Returns
     -------

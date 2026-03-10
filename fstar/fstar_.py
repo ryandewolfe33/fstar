@@ -131,7 +131,7 @@ def edge_clustering_to_node_clustering(adjacency, edge_clustering):
     return node_clustering.tocsr()
 
 
-def fstar(c1, c2, outliers=True, drop_outliers=False):
+def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5):
     """
     Compute F*_wo between c1 and c2.
 
@@ -143,6 +143,8 @@ def fstar(c1, c2, outliers=True, drop_outliers=False):
     drop_outliers:[False, 'c1', 'c2', 'either', 'both'] (default=False) - Flag to drop objects that consider outliers
         before computing score. Can be helpful for determining the quality of the clusters
         when extra outliers are not a concern.
+    alpha:float (default=0.5) - A value between 0 and 1 to control the importance of matching in each direction.
+        The default 0.5 is a symmetric measure, and 0/1 only looks at the best match for clustering in c1/c2.
     """
     # Massage type to a csr_array
     if sp.issparse(c1):
@@ -225,5 +227,7 @@ def fstar(c1, c2, outliers=True, drop_outliers=False):
     c2_fs_average = np.sum(c2_fs * c2_props)
 
     if not outliers:
-        return 0.5*c1_fs_average + 0.5*c2_fs_average
-    return 0.5 * (c1_outlier_prop * outlier_fs + (1-c1_outlier_prop)*c1_fs_average) + 0.5 * (c2_outlier_prop * outlier_fs + (1-c2_outlier_prop)*c2_fs_average)
+        return alpha*c1_fs_average + (1-alpha)*c2_fs_average
+    return alpha * (c1_outlier_prop * outlier_fs + (1-c1_outlier_prop)*c1_fs_average) \
+        + (1-alpha) * (c2_outlier_prop * outlier_fs + (1-c2_outlier_prop)*c2_fs_average)
+    
