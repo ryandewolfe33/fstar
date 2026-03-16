@@ -131,7 +131,7 @@ def edge_clustering_to_node_clustering(adjacency, edge_clustering):
     return node_clustering.tocsr()
 
 
-def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5):
+def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5, average="weighted"):
     """
     Compute F*_wo between c1 and c2.
 
@@ -145,6 +145,9 @@ def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5):
         when extra outliers are not a concern.
     alpha:float (default=0.5) - A value between 0 and 1 to control the importance of matching in each direction.
         The default 0.5 is a symmetric measure, and 0/1 only looks at the best match for clustering in c1/c2.
+    average:["weighted", "unweighted", False] (default="weighted") - Method to average across cluster scores. Defaults
+        to weighted by cluster size (necessary for the stability theorem). If False and alpha = 0 or 1, returns
+        the array of cluster scores, will throw an error for alpha in (0,1).
     """
     # Massage type to a csr_array
     if sp.issparse(c1):
@@ -205,8 +208,6 @@ def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5):
     c1 = c1.tocsr()
     c2 = c2.tocsr()
 
-    c1_props = np.asarray(c1.sum(axis=1)).reshape(-1)
-    c1_props = c1_props / np.sum(c1_props)
     c2_props = np.asarray(c2.sum(axis=1)).reshape(-1)
     c2_props = c2_props / np.sum(c2_props)
 
@@ -222,9 +223,27 @@ def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5):
     fs = intersect.multiply(union)
 
     c1_fs = fs.max(axis=1).toarray().reshape(-1)
-    c1_fs_average = np.sum(c1_fs * c1_props)
     c2_fs = fs.max(axis=0).toarray().reshape(-1)
-    c2_fs_average = np.sum(c2_fs * c2_props)
+
+    if not average:
+        if alpha == 1:
+            return c1_fs
+        elif alpha == 0:
+            return c2_fs
+        else:
+            raise ValueError("average=False can only be used with alpha=0 or alpha=1.")
+    elif average == "weighted":
+        c1_props = np.asarray(c1.sum(axis=1)).reshape(-1)
+        c1_props = c1_props / np.sum(c1_props)
+        c1_fs_average = np.sum(c1_fs * c1_props)
+        c2_props = np.asarray(c2.sum(axis=1)).reshape(-1)
+        c2_props = c2_props / np.sum(c2_props)
+        c2_fs_average = np.sum(c2_fs * c2_props)
+    elif average == "unweighted":
+        c1_fs_average = np.mean(c1_fs)
+        c2_fs_average = np.mean(c2_fs)
+    else:
+        raise ValueError(f"average must be one of ['unweighted', 'weighted', False]. Got {average}")
 
     if not outliers:
         return alpha*c1_fs_average + (1-alpha)*c2_fs_average
