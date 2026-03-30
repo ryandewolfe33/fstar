@@ -5,8 +5,8 @@ A Pragmatic Method for Comparing Clusterings with Overlaps and Outliers.
 The package is currently pip installable but is not on pypi. For now, please clone this repository and install locally by following the instructions below.
 
 ```{shell}
-git clone https://github.com/ryandewolfe33/Fstar.git
-cd Fstar
+git clone https://github.com/ryandewolfe33/fstar.git
+cd fstar
 pip install .
 ```
 
