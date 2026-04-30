@@ -25,7 +25,7 @@ fstar.fstar(c1, c2, outliers=True,drop_outliers=False, alpha=0.5) -> float:
     c2:scipy.sparse_array or np.ndarray - the second clustering
     outliers:bool (defualt=True) - Flag to add outlier comparison term. If True compute F*_wo, if False compute F*_w
     drop_outliers:[False, 'c1', 'c2', 'either', 'both'] (default=False) - Flag to drop objects that consider outliers before computing score. Can be helpful for determining the quality of the clusters when extra outliers are not a concern.
-    alpha:float (default=0.5) - A value between 0 and 1 to control the importance of matching in each direction. The default 0.5 is a symmetric measure, and 0/1 only looks at the best match for clustering in c1/c2.
+    alpha:float (default=0.5) - A value between 0 and 1 to control the importance of matching in each direction. The default 0.5 is a symmetric measure, alpha=1 puts all the weight on the ability of each cluster in c1 to find a match and alpha=0 puts all the weight on the ability of each cluster in c2 to find a match.
     
     Returns
     -------
