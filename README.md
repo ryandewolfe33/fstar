@@ -31,6 +31,8 @@ fstar.fstar(c1, c2, outliers=True,drop_outliers=False, alpha=0.5) -> float:
     -------
     float: the similarity scoree between c1 and c2.
 ```
+The clusterings may be input as either a sparse cluster x object membership matrix (entry (i,j) is true if object j is in cluster i), or a 1d numpy where the value at index i is the cluster id of object i (and -1 denotes no cluster, i.e, object i is an outlier).
+
 
 There are also two helper function for working with graph aware comparisons. To compute the closed edge clustering of an edge clustering `e1`, run `node_clustering_to_edge_clustering(adjacency, edge_clustering_to_node_clustering(adjacency, e1))`.
 ```
