@@ -131,6 +131,29 @@ def edge_clustering_to_node_clustering(adjacency, edge_clustering):
     return node_clustering.tocsr()
 
 
+def find_best_matches(c1, c2, return_match_ids=False):
+    intersect = c1.astype("float64") @ c2.transpose().astype("float64")
+    rs = np.asarray(c1.sum(axis=1)).reshape(-1)  # row sums
+    cs = np.asarray(c2.sum(axis=1)).reshape(-1)  # col sums
+    rd = sp.diags(rs, dtype="float64")
+    cd = sp.diags(cs, dtype="float64")
+    nz = intersect.copy()  # Store non-zero data indices
+    nz.data = np.ones_like(nz.data)
+    union = rd @ nz + nz @ cd - intersect  # union is |p| + |l| - |p and l|
+    union.data = 1/union.data
+    fs = intersect.multiply(union)
+
+    c1_fs = fs.max(axis=1).toarray().reshape(-1)
+    c2_fs = fs.max(axis=0).toarray().reshape(-1)
+
+    if return_match_ids:
+        c1_matches = fs.argmax(axis=1).toarray().reshape(-1)
+        c2_matches = fs.argmax(axis=0).toarray().reshape(-1)
+        return c1_fs, c2_fs, c1_matches, c2_matches
+
+    return c1_fs, c2_fs
+
+
 def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5, average="weighted"):
     """
     Compute F*_wo between c1 and c2.
@@ -208,19 +231,7 @@ def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5, average="weight
     c1 = c1.tocsr()
     c2 = c2.tocsr()
 
-    intersect = c1.astype("float64") @ c2.transpose().astype("float64")
-    rs = np.asarray(c1.sum(axis=1)).reshape(-1)  # row sums
-    cs = np.asarray(c2.sum(axis=1)).reshape(-1)  # col sums
-    rd = sp.diags(rs, dtype="float64")
-    cd = sp.diags(cs, dtype="float64")
-    nz = intersect.copy()  # Store non-zero data indices
-    nz.data = np.ones_like(nz.data)
-    union = rd @ nz + nz @ cd - intersect  # union is |p| + |l| - |p and l|
-    union.data = 1/union.data
-    fs = intersect.multiply(union)
-
-    c1_fs = fs.max(axis=1).toarray().reshape(-1)
-    c2_fs = fs.max(axis=0).toarray().reshape(-1)
+    c1_fs, c2_fs = find_best_matches(c1, c2)
 
     if not average:
         if alpha == 1:
