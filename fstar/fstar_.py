@@ -78,6 +78,20 @@ def edge_clustering_to_node_clustering(adjacency, edge_clustering):
 
 
 def find_best_matches(c1, c2, return_match_ids=False):
+    """ Find the best match for each cluster. Returns either
+    two arrays of the F* scores for each cluster, or if
+    `return_match_ids=True` then return four arrays, the first
+    two the same as above and the second two are the cluster ids
+    of the best match in the other clustering.
+
+    Parameters
+    ----------
+    c1: scipy.sparse_array - the first clustering
+    c2: scipy.sparse_array - the second clustering
+    return_match_ids:bool (default=False) - Flag to include match ids in return
+    """
+    c1 = c1.tocsr()
+    c2 = c2.tocsr()
     intersect = c1.astype("float64") @ c2.transpose().astype("float64")
     rs = np.asarray(c1.sum(axis=1)).reshape(-1)  # row sums
     cs = np.asarray(c2.sum(axis=1)).reshape(-1)  # col sums
@@ -100,9 +114,14 @@ def find_best_matches(c1, c2, return_match_ids=False):
     return c1_fs, c2_fs
 
 
-def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5, average="weighted"):
-    """
-    Compute F*_wo between c1 and c2.
+def fstar(
+        c1: sp.sparray | np.ndarray,
+        c2: sp.sparray | np.ndarray,
+        outliers: bool = True,
+        drop_outliers: bool | str =False,
+        alpha: float = 0.5
+    ) -> float:
+    """ Compute F*_wo between c1 and c2.
 
     Parameters
     ----------
@@ -115,9 +134,6 @@ def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5, average="weight
     alpha:float (default=0.5) - A value between 0 and 1 to control the importance of matching in each direction.
         The default 0.5 is a symmetric measure, alpha=1 puts all the weight on the ability of each cluster in c1 to
         find a match and alpha=0 puts all the weight on the ability of each cluster in c2 to find a match.
-    average:["weighted", "unweighted", False] (default="weighted") - Method to average across cluster scores. Defaults
-        to weighted by cluster size (necessary for the stability theorem). If False and alpha = 0 or 1, returns
-        the array of cluster scores, will throw an error for alpha in (0,1).
     """
     # Massage type to a csr_array
     if sp.issparse(c1):
@@ -171,36 +187,19 @@ def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5, average="weight
     if c1.shape[0] == 0 or c2.shape[0] == 0:
         if not outliers:
             return 0
-        return 0.5 * c1_outlier_prop * outlier_fs + 0.5 * c2_outlier_prop * outlier_fs
-
-    # Back to csr for cluster matching
-    c1 = c1.tocsr()
-    c2 = c2.tocsr()
+        return outlier_fs * (alpha * c1_outlier_prop + (1-alpha) * c2_outlier_prop)
 
     c1_fs, c2_fs = find_best_matches(c1, c2)
 
-    if not average:
-        if alpha == 1:
-            return c1_fs
-        elif alpha == 0:
-            return c2_fs
-        else:
-            raise ValueError("average=False can only be used with alpha=0 or alpha=1.")
-    elif average == "weighted":
-        c1_props = np.asarray(c1.sum(axis=1)).reshape(-1)
-        c1_props = c1_props / np.sum(c1_props)
-        c1_fs_average = np.sum(c1_fs * c1_props)
-        c2_props = np.asarray(c2.sum(axis=1)).reshape(-1)
-        c2_props = c2_props / np.sum(c2_props)
-        c2_fs_average = np.sum(c2_fs * c2_props)
-    elif average == "unweighted":
-        c1_fs_average = np.mean(c1_fs)
-        c2_fs_average = np.mean(c2_fs)
-    else:
-        raise ValueError(f"average must be one of ['unweighted', 'weighted', False]. Got {average}")
+    c1_props = np.asarray(c1.sum(axis=1)).reshape(-1)
+    c1_props = c1_props / np.sum(c1_props)
+    c1_fsw = np.sum(c1_fs * c1_props)
+    c2_props = np.asarray(c2.sum(axis=1)).reshape(-1)
+    c2_props = c2_props / np.sum(c2_props)
+    c2_fsw = np.sum(c2_fs * c2_props)
 
-    if not outliers:
-        return alpha*c1_fs_average + (1-alpha)*c2_fs_average
+    if outliers:
+        c1_fsw = c1_outlier_prop * outlier_fs + (1-c1_outlier_prop) * c1_fsw
+        c2_fsw = c2_outlier_prop * outlier_fs + (1-c2_outlier_prop) * c2_fsw
 
-    return alpha * (c1_outlier_prop * outlier_fs + (1-c1_outlier_prop)*c1_fs_average) \
-        + (1-alpha) * (c2_outlier_prop * outlier_fs + (1-c2_outlier_prop)*c2_fs_average)
+    return alpha * c1_fsw + (1-alpha) * c2_fsw
