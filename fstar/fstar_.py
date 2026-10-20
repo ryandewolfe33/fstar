@@ -127,26 +127,27 @@ def fstar(
     ----------
     c1:scipy.sparse.array or np.ndarray - the first clustering
     c2:scipy.sparse_array or np.ndarray - the second clustering
-    outliers:bool (defualt=True) - Flag to add outlier comparison term. If True compute F*_wo, if False compute F*_w
-    drop_outliers:[False, 'c1', 'c2', 'either', 'both'] (default=False) - Flag to drop objects that consider outliers
-        before computing score. Can be helpful for determining the quality of the clusters
-        when extra outliers are not a concern.
-    alpha:float (default=0.5) - A value between 0 and 1 to control the importance of matching in each direction.
-        The default 0.5 is a symmetric measure, alpha=1 puts all the weight on the ability of each cluster in c1 to
-        find a match and alpha=0 puts all the weight on the ability of each cluster in c2 to find a match.
+    outliers:bool (defualt=True) - Flag to add outlier comparison term. If True compute F*_wo, if
+    False compute F*_w
+    drop_outliers:[False, 'c1', 'c2', 'either', 'both'] (default=False) - Flag to drop objects that
+        are consider outliers before computing score. Can be helpful for determining the quality of
+        the clusters when extra outliers are not a concern.
+    alpha:float (default=0.5) - A value between 0 and 1 to control the importance of matching in each
+        direction. The default 0.5 is a symmetric measure, alpha=1 puts all the weight on the ability
+        of each cluster in c1 to find a match and alpha=0 puts all the weight on the ability of each
+        cluster in c2 to find a match.
+
+    Returns
+    -------
+    float: the similarity scoree between c1 and c2.
     """
-    # Massage type to a csr_array
-    if sp.issparse(c1):
-        c1 = c1.tocsr()
-    elif isinstance(c1, np.ndarray):
+    if isinstance(c1, np.ndarray):
         c1 = clustering_array_to_sparse(c1)
-    else:
+    elif not sp.issparse(c1):
         raise ValueError("Fstar expects a scipy.sparse array or a 1d numpy array.")
-    if sp.issparse(c2):
-        c2 = c2.tocsr()
-    elif isinstance(c2, np.ndarray):
+    if isinstance(c2, np.ndarray):
         c2 = clustering_array_to_sparse(c2)
-    else:
+    elif not sp.issparse(c2):
         raise ValueError("Fstar expects a scipy.sparse array or a 1d numpy array.")
 
     #Finding and dropping outliers is easier in csc
