@@ -1,27 +1,32 @@
 [build-system]
-requires = ["setuptools >= 77.0.3"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.12.20,<0.13"]
+build-backend = "uv_build"
 
 [project]
 name = "fstar"
 version = "0.0.2"
-authors = [
-  { name="Ryan DeWolfe", email="ryandewolfe33@gmail.com" },
-]
-description = "Community Detection Post Processing."
+authors = [{ name="Ryan DeWolfe", email="ryan.dewolfe@uwaterloo.ca" }]
+description = "A pragmatic method for comparing clusterings with ovalaps and outliers."
 classifiers = [
-    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
     "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
 ]
 readme = "README.md"
 license = "MIT"
-license-files = ["LICEN[CS]E*"]
+license-files = ["LICENSE"]
 
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "numpy >= 2.0",
     "scipy >= 1.10",
 ]
 
-[tool.setuptools]
-packages = ["fstar"]
+[project.urls]
+Homepage = "https://github.com/ryandewolfe33/fstar"
+Repository = "https://github.com/ryandewolfe33/fstar"
+
+[tool.uv.build-backend]
+module-name = "fstar"
+module-root = ""
