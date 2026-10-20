@@ -1,72 +1,21 @@
-import importlib.util
-
 import numpy as np
 import scipy.sparse as sp
-
-
-def _void_decorator(func):
-    """A dummy decorator that does nothing."""
-    return func
-
-
-def conditional_njit(*args, **kwargs):
-    """
-    A decorator that applies @njit if Numba is installed,
-    otherwise acts as a pass-through decorator.
-    """
-    # Check if the 'numba' module is available
-    if importlib.util.find_spec("numba") is not None:
-        try:
-            from numba import njit
-            # Return the actual njit decorator, potentially with arguments
-            if args and callable(args[0]):
-                # Used as @conditional_njit on a function
-                return njit(args[0])
-            else:
-                # Used as @conditional_njit() with arguments or without a function initially
-                return njit(*args, **kwargs)
-        except ImportError:
-            # Fallback if numba is installed but njit is not importable for some reason
-            pass
-
-    # If numba is not installed or import failed, return the dummy decorator
-    if args and callable(args[0]):
-        # Used as @conditional_njit on a function
-        return args[0]
-    else:
-        # Used as @conditional_njit() with arguments
-        return _void_decorator
-
-
-@conditional_njit
-def _clustering_array_to_sparse(clustering):
-    n_clusters = np.max(clustering) + 1
-    n_nonoutliers = np.sum(clustering >= 0)
-    indptr = np.empty(n_clusters + 1, dtype="int32")
-    indices = np.empty(n_nonoutliers, dtype="int32")
-    data = np.ones(n_nonoutliers, dtype="bool")
-    next_index = 0
-    for c in range(n_clusters):
-        indptr[c] = next_index
-        cluster_objects = np.arange(len(clustering))[clustering == c]
-        n_cluster_objects = len(cluster_objects)
-        indices[next_index : next_index + n_cluster_objects] = cluster_objects
-        next_index += n_cluster_objects
-    indptr[-1] = next_index  # update last indptr entry
-    return indptr, indices, data
 
 
 def clustering_array_to_sparse(clustering):
     """Convert a numpy clsutering array to a (clusters x objects) csr array
     Clusters are assumed to be contiguous 0-max(clustering), and -1 denotes objects with no clusters
     """
-    indptr, indices, data = _clustering_array_to_sparse(clustering)
-    clustering = sp.csr_matrix(
-        (data, indices, indptr),
-        shape=(len(indptr) - 1, len(clustering)),
-        dtype="bool",
+    object_ids = np.arange(len(clustering), dtype=clustering.dtype)
+    inliers = clustering >= 0
+    object_ids = object_ids[inliers]
+    cluster_ids = clustering[inliers]
+    data = np.ones_like(cluster_ids, dtype="bool")
+
+    clustering = sp.coo_array(
+        (data, (cluster_ids, object_ids))
     )
-    clustering.data[:] = True  # Sometime some entries are flipped to false, don't know why.
+    clustering = clustering.tocsr()
     return clustering
 
 
@@ -79,16 +28,14 @@ def node_clustering_to_edge_clustering(adjacency, node_clustering):
         adjacency = sp.triu(adjacency).tocsr()
     else:
         raise ValueError("adjacency must be a scipy.sparse array.")
-    if sp.issparse(node_clustering):
-        node_clustering = node_clustering.tocsr()
-    elif isinstance(node_clustering, np.ndarray):
+    if isinstance(node_clustering, np.ndarray):
         node_clustering = clustering_array_to_sparse(node_clustering)
-    else:
+    elif not sp.issparse(node_clustering):
         raise ValueError("node_clustering must be a scipy.sparse array or a 1d numpy array.")
 
     # Need fast access to clusters per node
-    node_clustering = node_clustering.transpose().tocsr()
-    edge_clustering = sp.lil_array((len(adjacency.indices), node_clustering.shape[1]), dtype="bool")
+    node_clustering = node_clustering.tocsc()
+    edge_clustering = sp.lil_array((len(adjacency.indices), node_clustering.shape[0]), dtype="bool")
     edge_id = 0
     for n1 in range(len(adjacency.indptr)-1):
         for n2 in adjacency.indices[adjacency.indptr[n1]:adjacency.indptr[n1+1]]:
