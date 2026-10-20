@@ -1,7 +1,7 @@
-import scipy.sparse as sp
-import numpy as np
-
 import importlib.util
+
+import numpy as np
+import scipy.sparse as sp
 
 
 def _void_decorator(func):
@@ -11,7 +11,7 @@ def _void_decorator(func):
 
 def conditional_njit(*args, **kwargs):
     """
-    A decorator that applies @njit if Numba is installed, 
+    A decorator that applies @njit if Numba is installed,
     otherwise acts as a pass-through decorator.
     """
     # Check if the 'numba' module is available
@@ -28,7 +28,7 @@ def conditional_njit(*args, **kwargs):
         except ImportError:
             # Fallback if numba is installed but njit is not importable for some reason
             pass
-    
+
     # If numba is not installed or import failed, return the dummy decorator
     if args and callable(args[0]):
         # Used as @conditional_njit on a function
@@ -45,7 +45,6 @@ def _clustering_array_to_sparse(clustering):
     indptr = np.empty(n_clusters + 1, dtype="int32")
     indices = np.empty(n_nonoutliers, dtype="int32")
     data = np.ones(n_nonoutliers, dtype="bool")
-    clusters_argsort = np.argsort(clustering)
     next_index = 0
     for c in range(n_clusters):
         indptr[c] = next_index
@@ -86,7 +85,7 @@ def node_clustering_to_edge_clustering(adjacency, node_clustering):
         node_clustering = clustering_array_to_sparse(node_clustering)
     else:
         raise ValueError("node_clustering must be a scipy.sparse array or a 1d numpy array.")
-    
+
     # Need fast access to clusters per node
     node_clustering = node_clustering.transpose().tocsr()
     edge_clustering = sp.lil_array((len(adjacency.indices), node_clustering.shape[1]), dtype="bool")
@@ -117,7 +116,7 @@ def edge_clustering_to_node_clustering(adjacency, edge_clustering):
         edge_clustering = clustering_array_to_sparse(edge_clustering)
     else:
         raise ValueError("node_clustering must be a scipy.sparse array or a 1d numpy array.")
-    
+
     edge_clustering = edge_clustering.transpose().tocsr()
     node_clustering = sp.dok_array((edge_clustering.shape[1], adjacency.shape[0]), dtype="bool")
     edge_id = 0
@@ -255,7 +254,6 @@ def fstar(c1, c2, outliers=True, drop_outliers=False, alpha=0.5, average="weight
 
     if not outliers:
         return alpha*c1_fs_average + (1-alpha)*c2_fs_average
-    
+
     return alpha * (c1_outlier_prop * outlier_fs + (1-c1_outlier_prop)*c1_fs_average) \
         + (1-alpha) * (c2_outlier_prop * outlier_fs + (1-c2_outlier_prop)*c2_fs_average)
-    
