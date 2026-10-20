@@ -17,7 +17,7 @@ For examples of using fstar, please see the notebooks in the `experiments` folde
 ## API
 The main function is also named `fstar`, and computes a similarity score between two clusterings.
 ```python
-fstar.fstar(c1, c2, outliers=True,drop_outliers=False, alpha=0.5) -> float:
+def fstar.fstar(c1, c2, outliers=True,drop_outliers=False, alpha=0.5) -> float:
     """ Compute F*_wo between c1 and c2.
 
     Parameters
@@ -65,7 +65,7 @@ There are also two helper function for working with graph aware comparisons. To 
 edge clustering of an edge clustering `e1`, run
 `node_clustering_to_edge_clustering(adjacency, edge_clustering_to_node_clustering(adjacency, e1))`.
 ```python
-fstar.node_clustering_to_edge_clustering(adjacency, node_clustering)
+def fstar.node_clustering_to_edge_clustering(adjacency, node_clustering)
     """ Project a node clustering onto the edges. An edge is in a cluster if both endpoints are in
     that cluster. Edge ids are computed by the data_index of a csr representation of the upper
     triangular adjacency matrix.
@@ -82,7 +82,7 @@ fstar.node_clustering_to_edge_clustering(adjacency, node_clustering)
     """
 ```
 ```python
-fstar.edge_clustering_to_node_clustering(adjacency, edge_clustering):
+def fstar.edge_clustering_to_node_clustering(adjacency, edge_clustering):
     """
     Project an edge clustering onto the nodes. An node is in a cluster if it has at least one
     incident edge in that cluster. Edge ids are assumed to be the data_index of a csr
