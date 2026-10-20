@@ -114,7 +114,7 @@ Overlaps and Outliers. arxiv preprint (2026).
 
 ```bibtex
 @article{dewolfe2026fstar,
-    author    = {Ryan DeWolfe and Paweł Prałat and and François Théberge},
+    author    = {Ryan DeWolfe and Paweł Prałat and François Théberge},
     title     = {A Pragmatic Method for Comparing Clusterings with Overlaps and Outliers},
     journal   = {arxiv preprint},
     year      = {2026},
