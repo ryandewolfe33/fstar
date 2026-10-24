@@ -28,6 +28,15 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.17.1",
 ]
+experiments = [
+    "abcd-graph",
+    "clusim>=0.4",
+    "egosplit-sknetwork>=0.0.4",
+    "ipykernel>=7.4.0",
+    "matplotlib>=3.11.2",
+    "scikit-network>=0.33.5",
+    "tqdm>=4.70.1",
+]
 
 [project.urls]
 Homepage = "https://github.com/ryandewolfe33/fstar"
@@ -37,6 +46,10 @@ Repository = "https://github.com/ryandewolfe33/fstar"
 module-name = "fstar"
 module-root = ""
 
+[tool.uv.sources]
+clusim = { git = "https://github.com/Hoosier-Clusters/clusim" }
+abcd-graph = { git = "https://github.com/ryandewolfe33/abcd-graph", branch = "release/0.5.0-beta" }
+
 [tool.ruff]
 line-length = 88
 target-version = "py314"
@@ -44,7 +57,6 @@ exclude = [
     ".git",
     "build",
     "dist",
-    "experiments/",
 ]
 
 [tool.ruff.lint]
