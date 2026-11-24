@@ -3,7 +3,7 @@
 ![tests](https://github.com/ryandewolfe33/fstar/actions/workflows/test.yml/badge.svg)
 ![format](https://github.com/ryandewolfe33/fstar/actions/workflows/lint.yml/badge.svg)
 [![PyPI Version](https://img.shields.io/pypi/v/fstar-compare)](https://pypi.org/project/fstar-compare/)
-![GitHub License](https://img.shields.io/github/license/ryandewolfe33/fstar)
+[![GitHub License](https://img.shields.io/github/license/ryandewolfe33/fstar)](https://github.com/ryandewolfe33/fstar/blob/main/LICENSE)
 
 A pragmatic method for comparing clusterings with overlaps and outliers.
 
