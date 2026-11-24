@@ -12,9 +12,7 @@ def clustering_array_to_sparse(clustering):
     cluster_ids = clustering[inliers]
     data = np.ones_like(cluster_ids, dtype="bool")
 
-    clustering = sp.coo_array(
-        (data, (cluster_ids, object_ids))
-    )
+    clustering = sp.coo_array((data, (cluster_ids, object_ids)))
     clustering = clustering.tocsr()
     return clustering
 
@@ -31,18 +29,26 @@ def node_clustering_to_edge_clustering(adjacency, node_clustering):
     if isinstance(node_clustering, np.ndarray):
         node_clustering = clustering_array_to_sparse(node_clustering)
     elif not sp.issparse(node_clustering):
-        raise ValueError("node_clustering must be a scipy.sparse array or a 1d numpy array.")
+        raise ValueError(
+            "node_clustering must be a scipy.sparse array or a 1d numpy array."
+        )
 
     # Need fast access to clusters per node
     node_clustering = node_clustering.tocsc()
-    edge_clustering = sp.lil_array((len(adjacency.indices), node_clustering.shape[0]), dtype="bool")
+    edge_clustering = sp.lil_array(
+        (len(adjacency.indices), node_clustering.shape[0]), dtype="bool"
+    )
     edge_id = 0
-    for n1 in range(len(adjacency.indptr)-1):
-        for n2 in adjacency.indices[adjacency.indptr[n1]:adjacency.indptr[n1+1]]:
+    for n1 in range(len(adjacency.indptr) - 1):
+        for n2 in adjacency.indices[adjacency.indptr[n1] : adjacency.indptr[n1 + 1]]:
             common_clusters = np.intersect1d(
-                node_clustering.indices[node_clustering.indptr[n1]:node_clustering.indptr[n1+1]],
-                node_clustering.indices[node_clustering.indptr[n2]:node_clustering.indptr[n2+1]]
-                )
+                node_clustering.indices[
+                    node_clustering.indptr[n1] : node_clustering.indptr[n1 + 1]
+                ],
+                node_clustering.indices[
+                    node_clustering.indptr[n2] : node_clustering.indptr[n2 + 1]
+                ],
+            )
             edge_clustering[edge_id, common_clusters] = True
             edge_id += 1
     return edge_clustering.tocsc().transpose()
@@ -62,14 +68,20 @@ def edge_clustering_to_node_clustering(adjacency, edge_clustering):
     elif isinstance(edge_clustering, np.ndarray):
         edge_clustering = clustering_array_to_sparse(edge_clustering)
     else:
-        raise ValueError("node_clustering must be a scipy.sparse array or a 1d numpy array.")
+        raise ValueError(
+            "node_clustering must be a scipy.sparse array or a 1d numpy array."
+        )
 
     edge_clustering = edge_clustering.transpose().tocsr()
-    node_clustering = sp.dok_array((edge_clustering.shape[1], adjacency.shape[0]), dtype="bool")
+    node_clustering = sp.dok_array(
+        (edge_clustering.shape[1], adjacency.shape[0]), dtype="bool"
+    )
     edge_id = 0
-    for n1 in range(len(adjacency.indptr)-1):
-        for n2 in adjacency.indices[adjacency.indptr[n1]:adjacency.indptr[n1+1]]:
-            edge_clusters = edge_clustering.indices[edge_clustering.indptr[edge_id]:edge_clustering.indptr[edge_id+1]]
+    for n1 in range(len(adjacency.indptr) - 1):
+        for n2 in adjacency.indices[adjacency.indptr[n1] : adjacency.indptr[n1 + 1]]:
+            edge_clusters = edge_clustering.indices[
+                edge_clustering.indptr[edge_id] : edge_clustering.indptr[edge_id + 1]
+            ]
             for cluster in edge_clusters:
                 node_clustering[cluster, n1] = True
                 node_clustering[cluster, n2] = True
@@ -78,7 +90,7 @@ def edge_clustering_to_node_clustering(adjacency, edge_clustering):
 
 
 def find_best_matches(c1, c2, return_match_ids=False):
-    """ Find the best match for each cluster. Returns either
+    """Find the best match for each cluster. Returns either
     two arrays of the F* scores for each cluster, or if
     `return_match_ids=True` then return four arrays, the first
     two the same as above and the second two are the cluster ids
@@ -100,7 +112,7 @@ def find_best_matches(c1, c2, return_match_ids=False):
     nz = intersect.copy()  # Store non-zero data indices
     nz.data = np.ones_like(nz.data)
     union = rd @ nz + nz @ cd - intersect  # union is |p| + |l| - |p and l|
-    union.data = 1/union.data
+    union.data = 1 / union.data
     fs = intersect.multiply(union)
 
     c1_fs = fs.max(axis=1).toarray().reshape(-1)
@@ -115,13 +127,13 @@ def find_best_matches(c1, c2, return_match_ids=False):
 
 
 def fstar(
-        c1: sp.sparray | np.ndarray,
-        c2: sp.sparray | np.ndarray,
-        outliers: bool = True,
-        drop_outliers: bool | str =False,
-        alpha: float = 0.5
-    ) -> float:
-    """ Compute F*_wo between c1 and c2.
+    c1: sp.sparray | np.ndarray,
+    c2: sp.sparray | np.ndarray,
+    outliers: bool = True,
+    drop_outliers: bool | str = False,
+    alpha: float = 0.5,
+) -> float:
+    """Compute F*_wo between c1 and c2.
 
     Parameters
     ----------
@@ -150,7 +162,7 @@ def fstar(
     elif not sp.issparse(c2):
         raise ValueError("Fstar expects a scipy.sparse array or a 1d numpy array.")
 
-    #Finding and dropping outliers is easier in csc
+    # Finding and dropping outliers is easier in csc
     c1 = c1.tocsc()
     c2 = c2.tocsc()
 
@@ -166,7 +178,9 @@ def fstar(
         elif drop_outliers == "both":
             drop = np.bitwise_and(c1_outliers, c2_outliers)
         else:
-            raise ValueError("drop_outliers must be Falsey or one of ['c1', 'c2', 'either', 'both'].")
+            raise ValueError(
+                "drop_outliers must be Falsey or one of ['c1', 'c2', 'either', 'both']."
+            )
         c1 = c1[:, ~drop]
         c2 = c2[:, ~drop]
 
@@ -179,7 +193,9 @@ def fstar(
     outlier_intersect = np.sum(c1_outliers * c2_outliers)
     outlier_fs = 0
     if outlier_intersect > 0:
-        outlier_fs = outlier_intersect / (np.sum(c1_outliers) + np.sum(c2_outliers) - outlier_intersect)
+        outlier_fs = outlier_intersect / (
+            np.sum(c1_outliers) + np.sum(c2_outliers) - outlier_intersect
+        )
 
     c1_outlier_prop = np.sum(c1_outliers) / len(c1_outliers)
     c2_outlier_prop = np.sum(c2_outliers) / len(c2_outliers)
@@ -188,7 +204,7 @@ def fstar(
     if c1.shape[0] == 0 or c2.shape[0] == 0:
         if not outliers:
             return 0
-        return outlier_fs * (alpha * c1_outlier_prop + (1-alpha) * c2_outlier_prop)
+        return outlier_fs * (alpha * c1_outlier_prop + (1 - alpha) * c2_outlier_prop)
 
     c1_fs, c2_fs = find_best_matches(c1, c2)
 
@@ -200,7 +216,7 @@ def fstar(
     c2_fsw = np.sum(c2_fs * c2_props)
 
     if outliers:
-        c1_fsw = c1_outlier_prop * outlier_fs + (1-c1_outlier_prop) * c1_fsw
-        c2_fsw = c2_outlier_prop * outlier_fs + (1-c2_outlier_prop) * c2_fsw
+        c1_fsw = c1_outlier_prop * outlier_fs + (1 - c1_outlier_prop) * c1_fsw
+        c2_fsw = c2_outlier_prop * outlier_fs + (1 - c2_outlier_prop) * c2_fsw
 
-    return alpha * c1_fsw + (1-alpha) * c2_fsw
+    return alpha * c1_fsw + (1 - alpha) * c2_fsw

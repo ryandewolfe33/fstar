@@ -1,5 +1,5 @@
 import importlib.metadata
-import fstar # Required to see if package loads
+import fstar  # Required to see if package loads
 
 
 def test_package_metadata() -> None:
