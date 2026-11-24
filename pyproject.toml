@@ -3,8 +3,8 @@ requires = ["uv_build>=0.12.20,<0.13"]
 build-backend = "uv_build"
 
 [project]
-name = "fstar"
-version = "0.0.2"
+name = "fstar-compare"
+version = "0.0.3"
 authors = [{ name="Ryan DeWolfe", email="ryan.dewolfe@uwaterloo.ca" }]
 description = "A pragmatic method for comparing clusterings with ovalaps and outliers."
 classifiers = [

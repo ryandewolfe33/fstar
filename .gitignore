@@ -2,4 +2,5 @@ build
 *.egg-info
 *__pycache__
 *.pdf
+dist
 .DS_Store
