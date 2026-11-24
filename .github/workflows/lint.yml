@@ -6,7 +6,10 @@ jobs:
   ruff-format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/ruff-action@v4
-        with:
-          args: "format --check --diff"
+    - name: Checkout repository
+      uses: actions/checkout@v7
+
+    - name: Run ruff
+      uses: astral-sh/ruff-action@v4.1.0
+      with:
+        args: "format --check --diff"
