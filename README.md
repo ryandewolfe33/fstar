@@ -2,9 +2,14 @@
 A pragmatic method for comparing clusterings with overlaps and outliers.
 
 ## Getting Started
-The package is currently pip installable but is not on pypi. For now, please clone this
-repository and install locally by following the instructions below.
+The package is available for download from pypi under the name `fstar-compare`.
+The module installed is still named `fstar`.
 
+```{shell}
+pip install fstar-compare
+```
+
+Or can be installed from source
 ```{shell}
 git clone https://github.com/ryandewolfe33/fstar.git
 cd fstar
@@ -29,16 +34,20 @@ def fstar.fstar(
     Parameters
     ----------
     c1:scipy.sparse.array or np.ndarray - the first clustering
+
     c2:scipy.sparse_array or np.ndarray - the second clustering
-    outliers:bool (defualt=True) - Flag to add outlier comparison term. If True compute F*_wo,
-    if False compute F*_w
-    drop_outliers:[False, 'c1', 'c2', 'either', 'both'] (default=False) - Flag to drop objects
-    that consider outliers before computing score. Can be helpful for determining the quality
-    of the clusters when extra outliers are not a concern.
-    alpha:float (default=0.5) - A value between 0 and 1 to control the importance of matching
-    in each direction. The default 0.5 is a symmetric measure, alpha=1 puts all the weight on
-    the ability of each cluster in c1 to find a match and alpha=0 puts all the weight on the
-    ability of each cluster in c2 to find a match.
+
+    outliers:bool (defualt=True) - Flag to add outlier comparison term. If True compute
+    F*_wo, if False compute F*_w
+
+    drop_outliers:[False, 'c1', 'c2', 'either', 'both'] (default=False) - Flag to drop
+    objects that consider outliers before computing score. Can be helpful for determining
+    the quality of the clusters when extra outliers are not a concern.
+
+    alpha:float (default=0.5) - A value between 0 and 1 to control the importance of
+    matching in each direction. The default 0.5 is a symmetric measure, alpha=1 puts all
+    the weight on the ability of each cluster in c1 to find a match and alpha=0 puts all
+    the weight on the ability of each cluster in c2 to find a match.
     
     Returns
     -------
@@ -72,9 +81,9 @@ edge clustering of an edge clustering `e1`, run
 `node_clustering_to_edge_clustering(adjacency, edge_clustering_to_node_clustering(adjacency, e1))`.
 ```python
 def fstar.node_clustering_to_edge_clustering(adjacency, node_clustering):
-    """ Project a node clustering onto the edges. An edge is in a cluster if both endpoints are in
-    that cluster. Edge ids are computed by the data_index of a csr representation of the upper
-    triangular adjacency matrix.
+    """ Project a node clustering onto the edges. An edge is in a cluster if both endpoints
+    are in that cluster. Edge ids are computed by the data_index of a csr representation of
+    the upper triangular adjacency matrix.
 
     Parameters
     ----------
@@ -83,22 +92,23 @@ def fstar.node_clustering_to_edge_clustering(adjacency, node_clustering):
     
     Returns
     -------
-    scipy.sparse.csr_array - the induced edge clustering. Edge ids are the data_index of a csr
-    representation of the upper triangular adjacency matrix.
+    scipy.sparse.csr_array - the induced edge clustering. Edge ids are the data_index of a
+    csr representation of the upper triangular adjacency matrix.
     """
 ```
 ```python
 def fstar.edge_clustering_to_node_clustering(adjacency, edge_clustering):
     """
-    Project an edge clustering onto the nodes. An node is in a cluster if it has at least one
-    incident edge in that cluster. Edge ids are assumed to be the data_index of a csr
+    Project an edge clustering onto the nodes. An node is in a cluster if it has at least
+    one incident edge in that cluster. Edge ids are assumed to be the data_index of a csr
     representation of the upper triangular adjacency matrix.
 
     Parameters
     ----------
     adjacency:scipy.sparse.array - the adjacency matrix of the graph.
-    node_clustering:scipy.sparse_array or np.ndarray - the edge clustering. Edge ids are assumed
-    to be the data_index of a csr representation of the upper triangular adjacency matrix.
+    node_clustering:scipy.sparse_array or np.ndarray - the edge clustering. Edge ids are
+    assumed to be the data_index of a csr representation of the upper triangular adjacency
+    matrix.
     
     Returns
     -------
