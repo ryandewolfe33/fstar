@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "fstar-compare"
-version = "0.0.3"
+version = "0.0.4.dev0"
 authors = [{ name="Ryan DeWolfe", email="ryan.dewolfe@uwaterloo.ca" }]
 description = "A pragmatic method for comparing clusterings with ovalaps and outliers."
 classifiers = [
