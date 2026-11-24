@@ -1,4 +1,10 @@
 # Fstar
+
+![tests](https://github.com/ryandewolfe33/fstar/actions/workflows/test.yml/badge.svg)
+![format](https://github.com/ryandewolfe33/fstar/actions/workflows/lint.yml/badge.svg)
+[![PyPI Version](https://img.shields.io/pypi/v/fstar-compare)](https://pypi.org/project/fstar-compare/)
+![GitHub License](https://img.shields.io/github/license/ryandewolfe33/fstar)
+
 A pragmatic method for comparing clusterings with overlaps and outliers.
 
 ## Getting Started
@@ -62,7 +68,7 @@ If you want the cluster level fstar scores, or the ids of the best matching clus
 intermediate results are exposed as part of the `find_matches` function.
 ```python
 def find_best_matches(c1, c2, return_match_ids=False):
-    """ Find the best match for each cluster. Returns either
+    """Find the best match for each cluster. Returns either
     two arrays of the F* scores for each cluster, or if
     `return_match_ids=True` then return four arrays, the first
     two the same as above and the second two are the cluster ids
